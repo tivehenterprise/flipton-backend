@@ -183,43 +183,12 @@ mongoose
   })
   .catch((err) => console.log(err));
 
-// Listen for and broadcast notifications
-bot.on("message", async (ctx) => {
-  const batchSize = 100; // Number of users to process in each batch
-  let skip = 0;
-  let hasMoreUsers = true;
-  let count = 0;
-
-  try {
-    while (hasMoreUsers) {
-      const usersBatch = await User.find().skip(skip).limit(batchSize);
-      if (usersBatch.length > 0) {
-        for (const user of usersBatch) {
-          queue.enqueue(async () => {
-            try {
-              await sendNotification(ctx, user.chatId);
-              ++count;
-            } catch (error) {
-              console.log("Error sending message\n", error);
-            }
-          });
-        }
-        skip += batchSize;
-      } else {
-        hasMoreUsers = false;
-      }
-    }
-  } catch (error) {
-    console.log("Notification error:\n", error);
-  }
-});
-
 // Log a message when the bot is connected
 bot.telegram
   .getMe()
   .then((botInfo) => {
     console.log(`Bot ${botInfo.username} is connected and running.`);
-    // bot.launch();
+    bot.launch();
   })
   .catch((err) => {
     console.error("Error connecting bot:", err);
